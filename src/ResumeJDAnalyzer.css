@@ -1,0 +1,41 @@
+.resume-jd-analyzer-container {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  .resume-jd-analyzer-button {
+    background-color: #5cb85c; /* Success green */
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .resume-jd-analyzer-button:hover:not(:disabled) {
+    background-color: #4cae4c;
+    transform: translateY(-2px);
+  }
+  
+  .resume-jd-analyzer-button:disabled {
+    background-color: #d9edf7; /* Light blue for disabled */
+    color: #31708f; /* Darker blue for disabled text */
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+  
+  .resume-jd-analyzer-error {
+    color: #d9534f; /* Danger red */
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
+  .resume-jd-analyzer-loading {
+    font-style: italic;
+    color: #777;
+    margin-top: 10px;
+  }
+  

@@ -1,0 +1,138 @@
+.output-container {
+    width: 100%;
+    margin-top: 20px;
+    padding: 25px;
+    border: 1px solid #e9ecef; /* Very light gray border */
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  }
+  
+  .output-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .output-section:last-child {
+    border-bottom: none;
+  }
+  
+  .output-title {
+    font-size: 1.75em;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .output-title .item-icon {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+  
+  .output-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .output-item {
+    margin-bottom: 15px;
+    color: #495057; /* Medium dark gray text */
+    line-height: 1.7;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .output-item h3 {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 10px;
+  }
+  
+  .output-item p {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .output-item p .item-icon {
+    color: #007bff; /* Primary blue */
+    font-size: 0.9em;
+  }
+  
+  .output-item strong {
+    font-weight: bold;
+    color: #007bff; /* Primary blue */
+  }
+  
+  .output-item .description {
+    margin-top: 15px;
+    padding-left: 2.1em; /* Adjust to align with icon and label */
+  }
+  
+  .output-item .duration {
+    font-style: italic;
+    color: #6c757d;
+    padding-left: 2.1em;
+  }
+  
+  .skills-list .output-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+  }
+  
+  .skills-list .output-item .item-icon {
+    color: #28a745; /* Success green for skills */
+  }
+  
+  .projects-list .output-item .technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-left: 1em;
+  }
+  
+  .projects-list .output-item .technology-badge {
+    background-color: #007bff; /* Primary blue for tech badges */
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  
+  .empty-state, .empty-data {
+    padding: 30px;
+    text-align: center;
+    color: #6c757d;
+  }
+  
+  .empty-state-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #ffc107; /* Warning yellow */
+  }
+  
+  .empty-state-text, .empty-data-text {
+    font-style: italic;
+  }
+  
+  .error-state {
+    padding: 30px;
+    text-align: center;
+    color: #dc3545; /* Danger red */
+  }
+  
+  .error-text {
+    font-weight: bold;
+  }
+  

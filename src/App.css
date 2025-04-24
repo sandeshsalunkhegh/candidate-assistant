@@ -1,38 +1,208 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 40px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa; /* Light background */
+}
+
+h1 {
+  color: #2c3e50; /* Darker heading */
+  margin-bottom: 40px;
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 500;
+}
+
+.sections-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+  max-width: 1200px;
+}
+
+@media (min-width: 768px) {
+  .sections-wrapper {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.section-container {
+  flex: 1;
+  margin: 15px;
+  padding: 30px;
+  border: 1px solid #e0e0e0; /* Lighter border */
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* More pronounced shadow */
+  transition: box-shadow 0.3s ease;
+}
+
+.section-container:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  color: #34495e; /* Darker section heading */
+  margin-bottom: 25px;
+  border-bottom: 3px solid #bdc3c7; /* Thicker, lighter border */
+  padding-bottom: 15px;
+  font-size: 1.8em;
+  font-weight: 400;
+}
+
+textarea {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #d1d8e0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1.6;
+  transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #3498db; /* Highlighted border on focus */
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+}
+
+button {
+  background-color: #3498db; /* More vibrant blue */
   color: white;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.App-link {
-  color: #61dafb;
+button:disabled {
+  background-color: #bdc3c7;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+.error-message {
+  color: #e74c3c; /* More vibrant red */
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.loading-indicator {
+  margin-top: 15px;
+  font-style: italic;
+  color: #7f8c8d;
+}
+
+.no-data {
+  font-style: italic;
+  color: #7f8c8d;
+}
+
+/* Style for OutputDisplay (you might have a separate file, adjust there) */
+.output-container {
+  width: 100%;
+  margin-top: 25px;
+  padding: 25px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.output-container h3 {
+  color: #34495e;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #d1d8e0;
+  padding-bottom: 10px;
+  font-size: 1.5em;
+  font-weight: 400;
+}
+
+.output-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.output-section:last-child {
+  border-bottom: none;
+}
+
+.output-section h4 {
+  color: #7f8c8d;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.output-list {
+  list-style: none;
+  padding: 0;
+}
+
+.output-item {
+  color: #5e6e82;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.resume-jd-analyzer-container {
+  text-align: center;
+  margin-top: 30px; /* Adjust margin to match other sections if needed */
+}
+
+.resume-jd-analyzer-button {
+  background-color: #28a745; /* Success green, consistent with your earlier suggestion */
+  color: white;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px; /* Consistent border-radius */
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Add transition for shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.resume-jd-analyzer-button:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+.resume-jd-analyzer-button:disabled {
+  background-color: #bdc3c7; /* Consistent disabled color */
+  color: #fff; /* White text on disabled button */
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.resume-jd-analyzer-error {
+  color: #e74c3c; /* Consistent error color */
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.resume-jd-analyzer-loading {
+  font-style: italic;
+  color: #7f8c8d; /* Consistent loading color */
+  margin-top: 10px;
+}
+
+.output-section h5 {
+  color: #7f8c8d;
+  margin-bottom: 5px;
+  font-size: 1em;
+  font-weight: bold;
 }
