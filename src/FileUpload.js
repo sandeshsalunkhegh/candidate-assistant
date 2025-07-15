@@ -1,7 +1,26 @@
 import React, { useState, useRef } from 'react';
 import './FileUpload.css';
+import { MdUploadFile } from 'react-icons/md';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpload, faFilePdf, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { faFilePdf, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+
+/**
+ * FileUpload component for uploading and processing PDF resumes.
+ * @param {Object} props
+ * @param {(data?: any) => void} props.onDataReceived - Callback when data is received or upload starts.
+ */
+function getFriendlyUploadError(error) {
+  if (!error) return '';
+  if (typeof error !== 'string') return 'An unknown error occurred.';
+  if (error.includes('No PDF file uploaded')) return 'Please select a PDF file to upload.';
+  if (error.includes('Failed to extract text')) return 'Could not read your PDF. Please try another file.';
+  if (error.includes('Failed to parse')) return "Sorry, we couldn't analyze your resume. Try again.";
+  if (error.includes('413')) return 'File is too large. Please upload a smaller PDF.';
+  if (error.includes('415')) return 'Only PDF files are supported.';
+  if (error.includes('Network')) return 'Network error. Please check your connection.';
+  if (error.includes('500')) return 'Server error. Please try again later.';
+  return 'An error occurred: ' + error;
+}
 
 function FileUpload({ onDataReceived }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,6 +55,10 @@ function FileUpload({ onDataReceived }) {
       return;
     }
 
+    if (typeof onDataReceived === 'function') {
+      onDataReceived();
+    }
+
     setIsLoading(true);
     setUploadProgress(0);
     setUploadError('');
@@ -61,7 +84,7 @@ function FileUpload({ onDataReceived }) {
       onDataReceived(data);
     } catch (error) {
       console.error("Error uploading and processing PDF:", error);
-      setUploadError(error.message || 'Failed to process the PDF. Please try again.');
+      setUploadError(getFriendlyUploadError(error.message || 'Failed to process the PDF. Please try again.'));
     } finally {
       setIsLoading(false);
       setUploadProgress(0);
@@ -85,11 +108,21 @@ function FileUpload({ onDataReceived }) {
     }
   };
 
+  // Keyboard accessibility for upload area
+  const handleUploadAreaKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleButtonClick();
+    }
+  };
+
   return (
     <div
       className={`file-upload-container ${isLoading ? 'uploading' : ''} ${selectedFile ? 'file-selected' : ''}`}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      aria-busy={isLoading}
+      aria-live="polite"
     >
       <input
         type="file"
@@ -98,8 +131,16 @@ function FileUpload({ onDataReceived }) {
         id="pdfUpload"
         onChange={handleFileChange}
         ref={fileInputRef}
+        aria-label="Upload PDF resume"
       />
-      <div className="upload-area" onClick={handleButtonClick}>
+      <div
+        className="upload-area"
+        onClick={handleButtonClick}
+        onKeyDown={handleUploadAreaKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={selectedFile ? `Selected file: ${selectedFile.name}` : 'Drag and drop your PDF here or click to browse'}
+      >
         {selectedFile ? (
           <div className="selected-file-info">
             <FontAwesomeIcon icon={faFilePdf} className="file-icon" />
@@ -115,12 +156,18 @@ function FileUpload({ onDataReceived }) {
           </div>
         ) : (
           <>
-            <FontAwesomeIcon icon={faUpload} className="upload-icon" />
+            <MdUploadFile className="upload-icon" />
             <p>Drag and drop your PDF here or click to browse</p>
           </>
         )}
       </div>
-      <button onClick={handleUpload} disabled={!selectedFile || isLoading} className="process-button">
+      <button
+        onClick={handleUpload}
+        disabled={!selectedFile || isLoading}
+        className="process-button"
+        aria-busy={isLoading}
+        aria-label={isLoading ? 'Processing file' : 'Process file'}
+      >
         {isLoading ? 'Processing...' : 'Process'}
       </button>
       {isLoading && uploadProgress > 0 && (

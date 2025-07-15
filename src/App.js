@@ -1,56 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import FileUpload from './FileUpload';
-import OutputDisplay from './OutputDisplay';
-import axios from 'axios';
 import './FileUpload.css';
 import './OutputDisplay.css';
-import ResumeJdAnalyzer from './ResumeJDAnalyzer';
 import './ResumeJDAnalyzer.css';
+import JobTitleIndustryFields from './components/JobTitleIndustryFields';
+import JobDescriptionForm from './components/JobDescriptionForm';
+import ResumeUpload from './components/ResumeUpload';
+import AnalysisResult from './components/AnalysisResult';
+import ComparisonResult from './components/ComparisonResult';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Sidebar from './components/Sidebar';
+import useAnalyzeJobDescription from './hooks/useAnalyzeJobDescription';
+import ResumeJdAnalyzer from './ResumeJDAnalyzer'; // TODO: Refactor this to be modular if not already
 
 function App() {
   const [processedData, setProcessedData] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
-  const [analysisResult, setAnalysisResult] = useState(null);
   const [loadingResume, setLoadingResume] = useState(false);
-  const [loadingJobDescription, setLoadingJobDescription] = useState(false);
   const [errorResume, setErrorResume] = useState('');
-  const [errorJobDescription, setErrorJobDescription] = useState('');
   const [resumeJDComparison, setResumeJDComparison] = useState(null);
+  const [jobTitle, setJobTitle] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [activeSection, setActiveSection] = useState('#resume-analysis-result');
 
-  const apiUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001'; // Default for development
+  useEffect(() => {
+    const sectionIds = [
+      '#resume-analysis-result',
+      '#jd-analysis-result',
+      '#comparison',
+    ];
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      let found = sectionIds[0];
+      for (const id of sectionIds) {
+        const el = document.querySelector(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const top = rect.top + window.scrollY - 80; // offset for header
+          if (scrollY >= top - 10) {
+            found = id;
+          }
+        }
+      }
+      setActiveSection(found);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const handlePdfDataReceived = async (file) => {
-    setProcessedData(file);
+  // Use custom hook for JD analysis
+  const {
+    analyze: analyzeJD,
+    loading: loadingJobDescription,
+    error: errorJobDescription,
+    result: analysisResult
+  } = useAnalyzeJobDescription();
+
+  const handlePdfDataReceived = (data) => {
+    setProcessedData(data);
     setErrorResume('');
-    setLoadingResume(true);
+    setLoadingResume(false);
   };
 
   const handleJobDescriptionInputChange = (event) => {
     setJobDescription(event.target.value);
-    setAnalysisResult(null);
-    setErrorJobDescription('');
+    // setAnalysisResult(null); // This line is removed as per the edit hint
+    // setErrorJobDescription(''); // Remove, now handled by hook
   };
 
-  const handleAnalyzeJobDescription = async () => {
-    setLoadingJobDescription(true);
-    setAnalysisResult(null);
-    setErrorJobDescription('');
+  const handleJobTitleChange = (e) => setJobTitle(e.target.value);
+  const handleIndustryChange = (e) => setIndustry(e.target.value);
 
-    try {
-      const response = await axios.post(`${apiUrl}/api/analyze-job-description`, {
-        jobDescription: jobDescription,
-      });
-      setAnalysisResult(response.data);
-    } catch (err) {
-      console.error('Error analyzing job description:', err);
-      setErrorJobDescription('Failed to analyze job description.');
-      if (err.response && err.response.data && err.response.data.error) {
-        setErrorJobDescription(err.response.data.error);
-      }
-    } finally {
-      setLoadingJobDescription(false);
-    }
+  const handleAnalyzeJobDescription = () => {
+    analyzeJD({ jobDescription, jobTitle, industry });
   };
 
   const handleResumeJDComparison = (data) => {
@@ -58,172 +82,101 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <h1>Resume and Job Description Analysis</h1>
-
-      <div className="sections-wrapper">
-        <section className="section-container">
-          <h2>Analyze Job Description</h2>
-          <textarea
-            rows="8"
-            cols="60"
-            placeholder="Paste the job description here..."
-            value={jobDescription}
-            onChange={handleJobDescriptionInputChange}
+    <div className="sidebar-container">
+      <Sidebar activeSection={activeSection} />
+      <div className="main-content-with-sidebar">
+        <Header />
+        <div className="container">
+          {/* Modular: Job Title and Industry fields */}
+          <JobTitleIndustryFields
+            jobTitle={jobTitle}
+            industry={industry}
+            onJobTitleChange={handleJobTitleChange}
+            onIndustryChange={handleIndustryChange}
           />
-          <button
-            onClick={handleAnalyzeJobDescription}
-            disabled={loadingJobDescription || !jobDescription.trim()}
-          >
-            {loadingJobDescription ? 'Analyzing...' : 'Analyze'}
-          </button>
-
-          {errorJobDescription && <p className="error-message">{errorJobDescription}</p>}
-
-          {analysisResult && (
-            <div className="output-container">
-              <h3>Analysis Result:</h3>
-              {analysisResult.requiredSkills && analysisResult.requiredSkills.length > 0 && (
-                <div className="output-section">
-                  <h4>Required Skills:</h4>
-                  <ul className="output-list">
-                    {analysisResult.requiredSkills.map((skill, index) => (
-                      <li key={index} className="output-item">{skill}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {analysisResult.necessaryRequirements && analysisResult.necessaryRequirements.length > 0 && (
-                <div className="output-section">
-                  <h4>Necessary Requirements:</h4>
-                  <ul className="output-list">
-                    {analysisResult.necessaryRequirements.map((req, index) => (
-                      <li key={index} className="output-item">{req}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {analysisResult.preferredRequirements && analysisResult.preferredRequirements.length > 0 && (
-                <div className="output-section">
-                  <h4>Preferred Requirements:</h4>
-                  <ul className="output-list">
-                    {analysisResult.preferredRequirements.map((prefReq, index) => (
-                      <li key={index} className="output-item">{prefReq}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {Object.keys(analysisResult).length === 0 && !errorJobDescription && <p className="no-data">No analysis result yet.</p>}
+          <div className="main-analysis-row">
+            <div className="analysis-card" id="jd-analysis">
+              <h2 className="analysis-card-header">Analyze Job Description</h2>
+              <div className="analysis-card-divider"></div>
+              <JobDescriptionForm
+                jobDescription={jobDescription}
+                onJobDescriptionChange={handleJobDescriptionInputChange}
+                onAnalyze={handleAnalyzeJobDescription}
+                loading={loadingJobDescription}
+                error={errorJobDescription}
+              />
             </div>
-          )}
-        </section>
-
-        <section className="section-container">
-          <h2>Process PDF for Resume Analysis</h2>
-          <FileUpload onDataReceived={handlePdfDataReceived} loading={loadingResume} error={errorResume} />
-          {processedData && (
-            <div className="output-container">
-              <h3>Extracted Information:</h3>
-              <OutputDisplay data={processedData} />
+            <div className="analysis-card" id="resume-analysis">
+              <h2 className="analysis-card-header">Process PDF for Resume Analysis</h2>
+              <div className="analysis-card-divider"></div>
+              <ResumeUpload
+                onDataReceived={handlePdfDataReceived}
+                loading={loadingResume}
+                error={errorResume}
+                onStart={() => setLoadingResume(true)}
+              />
             </div>
-          )}
-          {errorResume && <p className="error-message">{errorResume}</p>}
-          {loadingResume && <p className="loading-indicator">Processing PDF...</p>}
-          {!processedData && !errorResume && !loadingResume && <p className="no-data">Upload a PDF to analyze.</p>}
-        </section>
-      </div>
-
-      {(processedData && analysisResult) && (
-        <div className="sections-wrapper">
-          <div className="section-container">
-            <h2>Analyze Resume against JD</h2>
-            <ResumeJdAnalyzer
-              resumeData={processedData}
-              jdAnalysis={analysisResult}
-              onSuggestions={handleResumeJDComparison}
-            />
-            {/* Removed console.log statements */}
-            {resumeJDComparison !== null && resumeJDComparison.ResumeJDComparison && (
-              <div className="output-container" style={{ marginTop: '20px' }}>
-                <h3>Resume-JD Comparison:</h3>
-                {resumeJDComparison.ResumeJDComparison.Suggestions && resumeJDComparison.ResumeJDComparison.Suggestions.length > 0 && (
-                  <div className="output-section">
-                    <h4>Suggestions:</h4>
-                    <ul className="output-list">
-                      {resumeJDComparison.ResumeJDComparison.Suggestions.map((suggestion, index) => (
-                        <li key={index} className="output-item">{suggestion}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {resumeJDComparison.ResumeJDComparison.AnalysisDetails && (
-                  <div className="output-section">
-                    <h4>Analysis Details:</h4>
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchPercentage !== undefined && (
-                      <p className="output-item">
-                        <strong>Match Percentage:</strong> {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchPercentage}%
-                      </p>
-                    )}
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.Reasoning && resumeJDComparison.ResumeJDComparison.AnalysisDetails.Reasoning.length > 0 && (
-                      <div className="output-section">
-                        <h4>Reasoning:</h4>
-                        <ul className="output-list">
-                          {resumeJDComparison.ResumeJDComparison.AnalysisDetails.Reasoning.map((reason, index) => (
-                            <li key={index} className="output-item">{reason}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedRequiredKeywords && resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedRequiredKeywords.length > 0 && (
-                      <div className="output-section">
-                        <h4>Matched Required Keywords:</h4>
-                        <ul className="output-list">
-                          {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedRequiredKeywords.map((keyword, index) => (
-                            <li key={index} className="output-item">{keyword}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedPreferredKeywords && resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedPreferredKeywords.length > 0 && (
-                      <div className="output-section">
-                        <h4>Matched Preferred Keywords:</h4>
-                        <ul className="output-list">
-                          {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchedPreferredKeywords.map((keyword, index) => (
-                            <li key={index} className="output-item">{keyword}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedRequiredKeywords && resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedRequiredKeywords.length > 0 && (
-                      <div className="output-section">
-                        <h4>Unmatched Required Keywords:</h4>
-                        <ul className="output-list">
-                          {resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedRequiredKeywords.map((keyword, index) => (
-                            <li key={index} className="output-item">{keyword}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedPreferredKeywords && resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedPreferredKeywords.length > 0 && (
-                      <div className="output-section">
-                        <h4>Unmatched Preferred Keywords:</h4>
-                        <ul className="output-list">
-                          {resumeJDComparison.ResumeJDComparison.AnalysisDetails.UnmatchedPreferredKeywords.map((keyword, index) => (
-                            <li key={index} className="output-item">{keyword}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
+          {/* Modular: Analysis Results */}
+          <div className="sections-wrapper">
+            <section className="section-container fade-in" id="jd-analysis-result">
+              <h2 className="section-header">Job Description Analysis Result</h2>
+              <div className="section-divider"></div>
+              {loadingJobDescription ? (
+                <div className="skeleton-loader" style={{ height: 80 }} />
+              ) : (
+                <AnalysisResult result={analysisResult} type="jd" />
+              )}
+            </section>
+            <section className="section-container fade-in" id="resume-analysis-result">
+              <h2 className="section-header">Resume Extraction Result</h2>
+              <div className="section-divider"></div>
+              {loadingResume ? (
+                <div className="skeleton-loader" style={{ height: 80 }} />
+              ) : (
+                <AnalysisResult result={processedData} type="resume" />
+              )}
+            </section>
+          </div>
+          {/* Modular: Resume-JD Comparison */}
+          {/* Only show comparison section if both processedData and analysisResult are present */}
+          {(processedData && analysisResult) ? (
+            <div className="sections-wrapper" id="comparison">
+              <div className="section-container fade-in">
+                <h2 className="section-header">Analyze Resume against JD</h2>
+                <div className="section-divider"></div>
+                <ResumeJdAnalyzer
+                  resumeData={processedData}
+                  jdAnalysis={analysisResult}
+                  onSuggestions={handleResumeJDComparison}
+                  jobTitle={jobTitle}
+                  industry={industry}
+                />
+                {/* ComparisonResult expects the ResumeJDComparison object */}
+                {resumeJDComparison?.ResumeJDComparison?.AnalysisDetails?.MatchPercentage !== undefined && (
+                  <span className="badge slide-in" style={{ marginBottom: 12 }}>
+                    Match: {resumeJDComparison.ResumeJDComparison.AnalysisDetails.MatchPercentage}%
+                  </span>
+                )}
+                <ComparisonResult comparison={resumeJDComparison?.ResumeJDComparison} />
+              </div>
+            </div>
+          ) : (
+            <div className="sections-wrapper" style={{ opacity: 0.5, pointerEvents: 'none' }}>
+              <div className="section-container fade-in" title="Please upload a resume and analyze a job description to enable this section." aria-live="polite">
+                <h2 className="section-header" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  Analyze Resume against JD
+                </h2>
+                <div className="section-divider"></div>
+                <div style={{ color: '#888', padding: '1rem' }}>
+                  Please upload a resume and analyze a job description to enable this section.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        <Footer />
+      </div>
     </div>
   );
 }
